@@ -1,5 +1,3 @@
-import ScalaJSKeys._
-
 val commonSettings = Seq(
   organization := "org.scalajs",
   version := "0.1-SNAPSHOT",
@@ -30,9 +28,10 @@ val transportShared = commonSettings ++ Seq(
   unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
 
 lazy val transportJavascript = project.in(file("transport/javascript"))
-  .settings((transportShared ++ scalaJSSettings): _*)
+  .enablePlugins(ScalaJSPlugin)
+  .settings(transportShared: _*)
   .settings(libraryDependencies ++= Seq(
-    "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % "0.6"))
+    "org.scala-js" %%% "scalajs-dom" % "0.7.0"))
 
 lazy val transportNetty = project.in(file("transport/netty"))
   .settings(transportShared: _*)
@@ -55,11 +54,12 @@ lazy val transportTyrus = project.in(file("transport/tyrus"))
 val autowireShared = transportShared ++ Seq(
   unmanagedSourceDirectories in Compile += baseDirectory.value / "../autowire",
   libraryDependencies ++= Seq(
-    "com.lihaoyi" %%% "upickle" % "0.2.2",
-    "com.lihaoyi" %%% "autowire" % "0.2.1"))
+    "com.lihaoyi" %%% "upickle" % "0.2.6-M1",
+    "com.lihaoyi" %%% "autowire" % "0.2.4-M1"))
 
 lazy val transportAutowireJs = project.in(file("transport/autowirejs"))
-  .settings((autowireShared ++ scalaJSSettings): _*)
+  .enablePlugins(ScalaJSPlugin)
+  .settings(autowireShared: _*)
 
 lazy val transportAutowireJvm = project.in(file("transport/autowirejvm"))
   .settings(autowireShared: _*)
@@ -103,7 +103,8 @@ def scalaJsOfPlayProject(p: Project) = Seq(
 
 
 lazy val webRTCExample = project.in(file("examples/webrtc"))
-  .settings((commonSettings ++ scalaJSSettings): _*)
+  .enablePlugins(ScalaJSPlugin)
+  .settings(commonSettings: _*)
   .dependsOn(transportJavascript)
 
 
@@ -117,7 +118,8 @@ lazy val autowire = project.in(file("examples/autowire/jvm"))
     "org.webjars" % "bootstrap" % "3.2.0"))
 
 lazy val autowireJs = project.in(file("examples/autowire/js"))
-  .settings((commonSettings ++ scalaJSSettings ++ scalaJsOfPlayProject(autowire)): _*)
+  .settings((commonSettings ++ scalaJsOfPlayProject(autowire)): _*)
+  .enablePlugins(ScalaJSPlugin)
   .dependsOn(transportJavascript, transportAutowireJs)
   .settings(libraryDependencies ++= Seq(
     "com.scalatags" %%% "scalatags" % "0.4.0"))
@@ -133,7 +135,8 @@ lazy val chatWebSocket = project.in(file("examples/chat-websocket/jvm"))
     "org.webjars" % "jquery" % "2.1.1"))
 
 lazy val chatWebSocketJs = project.in(file("examples/chat-websocket/js"))
-  .settings((commonSettings ++ scalaJSSettings ++ scalaJsOfPlayProject(chatWebSocket)): _*)
+  .enablePlugins(ScalaJSPlugin)
+  .settings((commonSettings ++ scalaJsOfPlayProject(chatWebSocket)): _*)
   .dependsOn(transportJavascript)
   .settings(libraryDependencies ++= Seq(
     "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6"))
@@ -149,7 +152,8 @@ lazy val chatWebRTC = project.in(file("examples/chat-webrtc/jvm"))
     "org.webjars" % "jquery" % "2.1.1"))
 
 lazy val chatWebRTCJs = project.in(file("examples/chat-webrtc/js"))
-  .settings((commonSettings ++ scalaJSSettings ++ scalaJsOfPlayProject(chatWebRTC)): _*)
+  .enablePlugins(ScalaJSPlugin)
+  .settings((commonSettings ++ scalaJsOfPlayProject(chatWebRTC)): _*)
   .dependsOn(transportJavascript)
   .settings(libraryDependencies ++= Seq(
     "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6"))
