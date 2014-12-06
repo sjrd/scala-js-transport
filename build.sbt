@@ -20,8 +20,8 @@ val commonSettings = Seq(
 
 lazy val root = project.in(file("."))
   .settings(commonSettings: _*)
-  .aggregate(transportJavascript, transportNetty, transportPlay, transportTyrus,
-    transportAkkaJs, transportAkkaJvm, transportAutowireJs, transportAutowireJvm)
+  .aggregate(transportJavascript, transportNetty, /*transportPlay,*/ transportTyrus,
+    transportAutowireJs, transportAutowireJvm)
 
 
 // Transport
@@ -32,10 +32,7 @@ val transportShared = commonSettings ++ Seq(
 lazy val transportJavascript = project.in(file("transport/javascript"))
   .settings((transportShared ++ scalaJSSettings): _*)
   .settings(libraryDependencies ++= Seq(
-    "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % "0.6",
-    // TODO: These two should go away at some point.
-    "org.scalajs" %%% "scalajs-pickling" % "0.3.1",
-    "org.scalajs" %%% "scalajs-actors" % "0.1-SNAPSHOT"))
+    "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % "0.6"))
 
 lazy val transportNetty = project.in(file("transport/netty"))
   .settings(transportShared: _*)
@@ -55,22 +52,6 @@ lazy val transportTyrus = project.in(file("transport/tyrus"))
     "org.glassfish.tyrus.bundles" % "tyrus-standalone-client" % "1.8.3"))
 
 
-val akkaShared = transportShared ++ Seq(
-  unmanagedSourceDirectories in Compile += baseDirectory.value / "../akka")
-
-lazy val transportAkkaJs = project.in(file("transport/akkajs"))
-  .settings((akkaShared ++ scalaJSSettings): _*)
-  .settings(libraryDependencies ++= Seq(
-    "org.scalajs" %%% "scalajs-pickling" % "0.3.1",
-    "org.scalajs" %%% "scalajs-actors" % "0.1-SNAPSHOT"))
-
-lazy val transportAkkaJvm = project.in(file("transport/akkajvm"))
-  .settings(akkaShared: _*)
-  .settings(libraryDependencies ++= Seq(
-    "com.typesafe.akka" %% "akka-actor" % "2.3.6",
-    "org.scalajs" %% "scalajs-pickling-play-json" % "0.3.1"))
-
-
 val autowireShared = transportShared ++ Seq(
   unmanagedSourceDirectories in Compile += baseDirectory.value / "../autowire",
   libraryDependencies ++= Seq(
@@ -82,6 +63,10 @@ lazy val transportAutowireJs = project.in(file("transport/autowirejs"))
 
 lazy val transportAutowireJvm = project.in(file("transport/autowirejvm"))
   .settings(autowireShared: _*)
+  .settings(
+    resolvers += "bintray/non" at "http://dl.bintray.com/non/maven"
+  )
+
 
 
 lazy val playTwoBrowsersTest = project.in(file("transport/playTwoBrowsersTest"))
@@ -119,7 +104,7 @@ def scalaJsOfPlayProject(p: Project) = Seq(
 
 lazy val webRTCExample = project.in(file("examples/webrtc"))
   .settings((commonSettings ++ scalaJSSettings): _*)
-  .dependsOn(transportJavascript, transportAkkaJs)
+  .dependsOn(transportJavascript)
 
 
 lazy val autowire = project.in(file("examples/autowire/jvm"))
@@ -141,7 +126,7 @@ lazy val autowireJs = project.in(file("examples/autowire/js"))
 lazy val chatWebSocket = project.in(file("examples/chat-websocket/jvm"))
   .enablePlugins(PlayScala)
   .settings((commonSettings ++ playWithScalaJs): _*)
-  .dependsOn(transportPlay, transportAkkaJvm, playTwoBrowsersTest % "test->test")
+  .dependsOn(transportPlay, playTwoBrowsersTest % "test->test")
   .settings(libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.3.0",
     "org.webjars" % "sockjs-client" % "0.3.4",
@@ -150,14 +135,13 @@ lazy val chatWebSocket = project.in(file("examples/chat-websocket/jvm"))
 lazy val chatWebSocketJs = project.in(file("examples/chat-websocket/js"))
   .settings((commonSettings ++ scalaJSSettings ++ scalaJsOfPlayProject(chatWebSocket)): _*)
   .dependsOn(transportJavascript)
-  .dependsOn(transportAkkaJs)
   .settings(libraryDependencies ++= Seq(
     "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6"))
 
 
 lazy val chatWebRTC = project.in(file("examples/chat-webrtc/jvm"))
   .enablePlugins(PlayScala)
-  .dependsOn(transportPlay, transportAkkaJvm, playTwoBrowsersTest % "test->test")
+  .dependsOn(transportPlay, playTwoBrowsersTest % "test->test")
   .settings((commonSettings ++ playWithScalaJs): _*)
   .settings(libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.3.0",
@@ -166,6 +150,6 @@ lazy val chatWebRTC = project.in(file("examples/chat-webrtc/jvm"))
 
 lazy val chatWebRTCJs = project.in(file("examples/chat-webrtc/js"))
   .settings((commonSettings ++ scalaJSSettings ++ scalaJsOfPlayProject(chatWebRTC)): _*)
-  .dependsOn(transportJavascript, transportAkkaJs)
+  .dependsOn(transportJavascript)
   .settings(libraryDependencies ++= Seq(
     "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6"))
